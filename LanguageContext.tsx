@@ -131,8 +131,9 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     document.documentElement.lang = language;
   }, [language]);
 
-  useEffect(() => {
+useEffect(() => {
     async function fetchContent() {
+      if (!supabase) return;
       const { data } = await supabase
         .from('site_content')
         .select('key, value');
