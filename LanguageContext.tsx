@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from './supabase';
 
 type Language = 'ar' | 'en';
 
@@ -21,11 +22,11 @@ export const useLanguage = () => {
 const translations = {
   ar: {
     nav: {
-  home: 'الرئيسية',
-  tracks: 'المسارات',
-  services: 'الخدمات',
-  contact: 'اتصل بنا'
-},
+      home: 'الرئيسية',
+      tracks: 'المسارات',
+      services: 'خدمات',
+      contact: 'اتصل بنا'
+    },
     hero: {
       title: 'إنسيا للدراسات والبحوث',
       focus: 'نحن نركز على',
@@ -71,20 +72,20 @@ const translations = {
   },
   en: {
     nav: {
-  home: 'Home',
-  tracks: 'Tracks',
-  services: 'Services',
-  contact: 'Contact Us'
-},
+      home: 'Home',
+      tracks: 'Tracks',
+      services: 'Services',
+      contact: 'Contact Us'
+    },
     hero: {
-      title: 'INSYA for Studies & Research',
+      title: 'ENSSIA for Studies & Research',
       focus: 'We Focus On',
       desc: 'We work to advance humanities research through rigorous methodologies and specialized interdisciplinary perspectives. We strive to bridge the gap between human thought and the scientific method.',
       cta: 'Learn More',
       typing: ["Humanities Research", "Social & Cultural Analysis", "Interdisciplinary Studies", "Knowledge Production", "Evidence-Based Insights"]
     },
     about: {
-      title: 'What is INSYA?',
+      title: 'What is ENSSIA?',
       p1: 'INSYA is a leading research foundation established in 2015 to promote scientific research in the humanities. We explore and analyze social and cultural issues.',
       p2: 'INSYA includes a multi-disciplinary research team relying on qualitative and quantitative methodologies and advanced scientific tools.',
       p3: 'The center contributes to development policies and decision-making, driving towards a sustainable positive impact on society.',
@@ -123,13 +124,42 @@ const translations = {
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguage] = useState<Language>('ar');
+  const [cmsData, setCmsData] = useState<Record<string, string>>({});
 
   useEffect(() => {
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = language;
   }, [language]);
 
+  useEffect(() => {
+    async function fetchContent() {
+      const { data } = await supabase
+        .from('site_content')
+        .select('key, value');
+
+      if (data) {
+        const map: Record<string, string> = {};
+        data.forEach((row: { key: string; value: string }) => {
+          map[row.key] = row.value;
+        });
+        setCmsData(map);
+      }
+    }
+    fetchContent();
+  }, []);
+
   const t = (path: string) => {
+    if (language === 'ar') {
+      const cmsKey = path.replace('.', '_');
+      if (cmsData[cmsKey]) {
+        try {
+          return JSON.parse(cmsData[cmsKey]);
+        } catch {
+          return cmsData[cmsKey];
+        }
+      }
+    }
+
     return path.split('.').reduce((obj, key) => obj?.[key], translations[language] as any);
   };
 
