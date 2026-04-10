@@ -45,6 +45,11 @@ export default function RootLayout({
           rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         />
+          <link rel="icon" href="/icon.png" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+  />
       </head>
       <body className={`${jost.variable} ${ibmPlexArabic.variable} ${poppins.variable} font-arabic`}>
         <LanguageProvider>
