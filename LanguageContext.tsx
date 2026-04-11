@@ -133,14 +133,10 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
 useEffect(() => {
     async function fetchContent() {
-      console.log('supabase:', supabase);
       if (!supabase) return;
-      console.log('fetching...');
       const { data } = await supabase!
         .from('site_content')
         .select('key, value');
-
-      console.log('data:', data);
 
       if (data) {
         const map: Record<string, string> = {};
@@ -157,14 +153,11 @@ const t = (path: string) => {
     if (language === 'ar') {
       const cmsKey = path.replace('.', '_');
       if (cmsData[cmsKey]) {
-        console.log('CMS HIT:', cmsKey, '=', cmsData[cmsKey]);
         try {
           return JSON.parse(cmsData[cmsKey]);
         } catch {
           return cmsData[cmsKey];
         }
-      } else {
-        console.log('CMS MISS:', cmsKey);
       }
     }
 
