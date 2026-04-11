@@ -133,10 +133,14 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
 useEffect(() => {
     async function fetchContent() {
+      console.log('supabase:', supabase);
       if (!supabase) return;
+      console.log('fetching...');
       const { data } = await supabase!
-  .from('site_content')
-  .select('key, value');
+        .from('site_content')
+        .select('key, value');
+
+      console.log('data:', data);
 
       if (data) {
         const map: Record<string, string> = {};
