@@ -9,9 +9,9 @@ export function useContent() {
 
   useEffect(() => {
     async function fetchContent() {
-      const { data } = await supabase
-        .from('site_content')
-        .select('key, value');
+      const { data } = await supabase!
+  .from('site_content')
+  .select('key, value');
 
       if (data) {
         const map: Record<string, string> = {};
