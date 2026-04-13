@@ -1,55 +1,65 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { supabase } from '../supabase';
 
-const SLIDES = [
-  {
-    id: 1,
-    image: 'https://picsum.photos/seed/insya1/1653/650.jpg',
-  },
-  {
-    id: 2,
-    image: 'https://picsum.photos/seed/insya2/1653/650.jpg',
-  },
-  {
-    id: 3,
-    image: 'https://picsum.photos/seed/insya3/1653/650.jpg',
-  },
-  {
-    id: 4,
-    image: 'https://picsum.photos/seed/insya4/1653/650.jpg',
-  },
-  {
-    id: 5,
-    image: 'https://picsum.photos/seed/insya5/1653/650.jpg',
-  },
-];
+interface Slide {
+  id: number;
+  image_url: string;
+}
 
 const Announcements: React.FC = () => {
+  const [slides, setSlides] = useState<Slide[]>([]);
   const [current, setCurrent] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  useEffect(() => {
+    async function fetchSlides() {
+      if (!supabase) return;
+      const { data } = await supabase
+        .from('announcements')
+        .select('*')
+        .order('id');
+
+      if (data) {
+        setSlides(data);
+      }
+    }
+    fetchSlides();
+  }, []);
+
   const startTimer = () => {
     if (timerRef.current) clearInterval(timerRef.current);
+    if (slides.length <= 1) return;
     timerRef.current = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % SLIDES.length);
+      setCurrent((prev) => (prev + 1) % slides.length);
     }, 15000);
   };
 
   useEffect(() => {
-    startTimer();
+    if (slides.length > 0) startTimer();
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, []);
+  }, [slides]);
 
   const goTo = (index: number) => {
     setCurrent(index);
     startTimer();
   };
 
-  const prev = () => goTo(current === 0 ? SLIDES.length - 1 : current - 1);
-  const next = () => goTo((current + 1) % SLIDES.length);
+  const prev = () => goTo(current === 0 ? slides.length - 1 : current - 1);
+  const next = () => goTo((current + 1) % slides.length);
+
+  if (slides.length === 0) {
+    return (
+      <section className="py-24 bg-bgLight">
+        <div className="max-w-7xl mx-auto px-6 text-center font-arabic text-customText/40">
+          لا توجد إعلانات حالياً
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-24 bg-bgLight">
@@ -60,10 +70,10 @@ const Announcements: React.FC = () => {
               className="flex transition-transform duration-700 ease-in-out"
               style={{ transform: `translateX(${current * 100}%)` }}
             >
-              {SLIDES.map((slide) => (
+              {slides.map((slide) => (
                 <div key={slide.id} className="w-full flex-shrink-0">
                   <img
-                    src={slide.image}
+                    src={slide.image_url}
                     alt=""
                     className="w-full h-auto object-cover"
                     style={{ aspectRatio: '1653 / 650' }}
@@ -91,19 +101,21 @@ const Announcements: React.FC = () => {
             </svg>
           </button>
 
-          <div className="flex justify-center gap-2 mt-6">
-            {SLIDES.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => goTo(i)}
-                className={`w-3 h-3 rounded-full transition-all ${
-                  i === current
-                    ? 'bg-primary w-8'
-                    : 'bg-softAccent/30 hover:bg-softAccent/60'
-                }`}
-              />
-            ))}
-          </div>
+          {slides.length > 1 && (
+            <div className="flex justify-center gap-2 mt-6">
+              {slides.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => goTo(i)}
+                  className={`w-3 h-3 rounded-full transition-all ${
+                    i === current
+                      ? 'bg-primary w-8'
+                      : 'bg-softAccent/30 hover:bg-softAccent/60'
+                  }`}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </section>
