@@ -150,14 +150,14 @@ useEffect(() => {
   }, []);
 
 const t = (path: string) => {
-    if (language === 'ar') {
-      const cmsKey = path.replace('.', '_');
-      if (cmsData[cmsKey]) {
-        try {
-          return JSON.parse(cmsData[cmsKey]);
-        } catch {
-          return cmsData[cmsKey];
-        }
+    const prefix = language === 'en' ? 'en_' : '';
+    const cmsKey = prefix + path.replace('.', '_');
+
+    if (cmsData[cmsKey]) {
+      try {
+        return JSON.parse(cmsData[cmsKey]);
+      } catch {
+        return cmsData[cmsKey];
       }
     }
 
